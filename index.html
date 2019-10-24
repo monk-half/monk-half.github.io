@@ -151,27 +151,178 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-迭代器模式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-string操作" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/">迭代器模式</a>
+      <a class="article-title" href="/2019/10/23/string%E6%93%8D%E4%BD%9C/">string操作</a>
     </h1>
   
 
         
-        <a href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2019-10-22T08:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-22</time>
+        <a href="/2019/10/23/string%E6%93%8D%E4%BD%9C/" class="archive-article-date">
+  	<time datetime="2019-10-23T11:26:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-23</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="string-类型"><a href="#string-类型" class="headerlink" title="string 类型"></a>string 类型</h1><h2 id="参数传递"><a href="#参数传递" class="headerlink" title="参数传递"></a>参数传递</h2><p>string是C#中比较特殊的数据类型，属于引用类型，但是用法上又跟普通的值类型相似。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">private void FuncA(string strAIn)&#123;</span><br><span class="line">	strAIn = &quot;b&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private void FuncB()&#123;</span><br><span class="line">	string strA = &quot;a&quot;;</span><br><span class="line">	FuncA(strA);</span><br><span class="line">	print(&quot;output: &quot; + strA);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight plain"><figcaption><span>a```</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### 原理</span><br><span class="line">定义字符串常量时，会在堆中申请相应的空间存放该字符串常量。</span><br><span class="line">strA = &quot;a&quot;;执行该语句时，在栈中开辟一个存放字符串地址的变量，即存放指向&quot;a&quot;的指针。</span><br><span class="line">FuncA(strA);执行该语句时，在调用栈中再开辟一个指针strAIn，将strA中存放的地址拷贝给strAIn。</span><br><span class="line">strAIn = &quot;b&quot;;执行该语句时，将strAIn中的存放的地址修改为指向&quot;b&quot;的地址。</span><br><span class="line">FuncA(string strAIn);方法结束时，清除调用栈，strAIn变量回收，strA存放的内容不变。</span><br><span class="line"></span><br><span class="line">## 使用效率</span><br><span class="line">C# 内置了个Stopwatch的类(System.Diagnostics)，可以用来计算代码块的运行时间。</span><br><span class="line"></span><br><span class="line">### const readonly 与普通变量</span><br></pre></td></tr></table></figure>
+<pre><code>const string str1 = &quot;str1&quot;;
+readonly string str2 = &quot;str2&quot;;
+string str3 = &quot;str3&quot;;
+
+private void FuncConst(int iLoopCnt) {
+    for (int i=0; i&lt;iLoopCnt; i++){
+        string str = str1 + str1;
+    }
+}
+
+private void FuncReadOnly(int iLoopCnt) {
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        string str = str2 + str2;
+    }
+}
+
+private void FuncCommon(int iLoopCnt) {
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        string str = str3 + str3;
+    }
+}
+
+// Start is called before the first frame update
+void Start()
+{
+    Stopwatch sw = new Stopwatch();
+
+    sw.Start();
+    FuncConst(1000000);
+    sw.Stop();
+    print(&quot;FuncConst cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncReadOnly(1000000);
+    sw.Stop();
+    print(&quot;FuncReadOnly cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncCommon(1000000);
+    sw.Stop();
+    print(&quot;FuncCommon cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+}</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">运行结果：</span><br></pre></td></tr></table></figure>
+<p>FuncConst cost: 4<br>FuncReadOnly cost: 232<br>FuncCommon cost: 244</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; 结论：</span><br><span class="line">&gt; 字符串常量效率 &gt;&gt; 只读字符串变量效率 &gt; 普通字符串变量。</span><br><span class="line">&gt; 字符串常量之所以效率这么高，是因为在C#编译阶段就对const字符串进行了替换。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### StringBuilder 与 string.Format 与 + 短拼接</span><br></pre></td></tr></table></figure>
+<pre><code>const string str1 = &quot;str1&quot;;
+readonly string str2 = &quot;str2&quot;;
+string str3 = &quot;str3&quot;;
+
+private void FuncStringBuilder(int iLoopCnt) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        sb.Append(str1).Append(str2).Append(str3);
+        sb.Clear();
+    }
+}
+
+private void FuncFormat(int iLoopCnt) {
+    string str = string.Empty;
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        str = string.Format(&quot;{0}{1}{2}&quot;, str1, str2, str3);
+    }
+}
+
+private void FuncAdd(int iLoopCnt) {
+    string str = string.Empty;
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        str = str1 + str2 + str3;
+    }
+}
+
+void Start(){
+    sw.Start();
+    FuncStringBuilder(100000);
+    sw.Stop();
+    print(&quot;FuncStringBuilder cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncFormat(100000);
+    sw.Stop();
+    print(&quot;FuncFormat cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncAdd(100000);
+    sw.Stop();
+    print(&quot;FuncAdd cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+}</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">结果：</span><br></pre></td></tr></table></figure>
+<p>FuncStringBuilder cost: 17<br>FuncFormat cost: 78<br>FuncAdd cost: 29</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">如果每次都创建stringbuilder：</span><br></pre></td></tr></table></figure>
+<p>private void FuncStringBuilder1(int iLoopCnt) {<br>    for (int i = 0; i &lt; iLoopCnt; i++) {<br>        StringBuilder sb = new StringBuilder().Append(str1).Append(str2).Append(str3);<br>    }<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">结果：</span><br><span class="line">FuncStringBuilder1 cost: 48</span><br><span class="line"></span><br><span class="line">&gt; 结论:</span><br><span class="line">&gt; 拼接次数少的情况下，StringBuilder效率 &gt; + &gt; string.Format.</span><br><span class="line">&gt; 但如果每次都new StringBuilder对象，则 +效率 &gt; StringBuilder &gt; string.Format</span><br><span class="line">&gt; 如果程序在不同地方使用拼接，一般都会new StringBuilder(耗时较高)，所有地方的耗时加起来，效率将会低于直接使用+拼接。</span><br><span class="line">&gt; 综上：拼接次数少的时候，直接使用+号进行拼接即可。</span><br><span class="line"></span><br><span class="line">### StringBuilder 与 string.Format 与 + 长拼接</span><br></pre></td></tr></table></figure>
+<pre><code>private void FuncStringBuilderLong(int iLoopCnt) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        sb.Append(str1);
+    }
+}
+private void FuncFormatLong(int iLoopCnt) {
+    string str = string.Empty;
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        str += string.Format(&quot;{0}&quot;, str1);
+    }
+}
+
+private void FuncAddLong(int iLoopCnt) {
+    string str = string.Empty;
+    for (int i = 0; i &lt; iLoopCnt; i++) {
+        str += str1;
+    }
+}
+
+void Start(){
+    sw.Start();
+    FuncStringBuilderLong(10000);
+    sw.Stop();
+    print(&quot;FuncStringBuilderLong cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncFormatLong(10000);
+    sw.Stop();
+    print(&quot;FuncFormatLong cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+
+    sw.Start();
+    FuncAddLong(10000);
+    sw.Stop();
+    print(&quot;FuncAddLong cost: &quot; + sw.ElapsedMilliseconds);
+    sw.Reset();
+}</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">结果：</span><br></pre></td></tr></table></figure>
+<p>FuncStringBuilderLong cost: 0<br>FuncFormatLong cost: 788<br>FuncAddLong cost: 2410</p>
+<p>```</p>
+<p>原因：<br>str += str1； 执行时，程序先向堆申请新的内存空间，然后将str str1的内容拷贝到新的堆中，最后将str存放的地址替换为新的堆地址。而且操作过程中产生大量垃圾。<br>sb.Append(str1); 执行时，直接在堆空间中增加内容，若内容长度超过堆空间大小，则进行扩容(扩容大小为初始大小的整数倍)。</p>
+<blockquote>
+<p>结论<br>拼接次数多的情况下, StringBuilder效率 &gt;&gt; string.format &gt;&gt; +</p>
+</blockquote>
+<h2 id="string-使用细节"><a href="#string-使用细节" class="headerlink" title="string 使用细节"></a>string 使用细节</h2><p><a href="https://blog.csdn.net/jiankunking/article/details/49702803" target="_blank" rel="noopener">https://blog.csdn.net/jiankunking/article/details/49702803</a></p>
+<h2 id="垃圾回收器原理"><a href="#垃圾回收器原理" class="headerlink" title="垃圾回收器原理"></a>垃圾回收器原理</h2><p><a href="https://www.cnblogs.com/nele/p/5673215.html" target="_blank" rel="noopener">https://www.cnblogs.com/nele/p/5673215.html</a><br>【备忘】<br>ref out in等参数传递关键字</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><blockquote>
+<p><a href="https://www.cnblogs.com/boboooo/p/9066831.html" target="_blank" rel="noopener">值类型与引用类型原理</a><br><a href="https://blog.csdn.net/mrxu_persi/article/details/78642128" target="_blank" rel="noopener">string 与 StringBuilder</a><br><a href="https://blog.csdn.net/jiankunking/article/details/49702803" target="_blank" rel="noopener">C# 字符串操作</a></p>
+</blockquote>
+
       
 
       
@@ -179,22 +330,11 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/">展开全文 >></a>
+          <a class="article-more-a" href="/2019/10/23/string%E6%93%8D%E4%BD%9C/">展开全文 >></a>
         </p>
       
 
@@ -224,39 +364,88 @@
 
 
   
-    <article id="post-C# 迭代器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-迭代器模式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/10/22/C#%20%E8%BF%AD%E4%BB%A3%E5%99%A8/">C# 迭代器</a>
+      <a class="article-title" href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/">迭代器模式</a>
     </h1>
   
 
         
-        <a href="/2019/10/22/C#%20%E8%BF%AD%E4%BB%A3%E5%99%A8/" class="archive-article-date">
-  	<time datetime="2019-10-22T08:29:01.480Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-22</time>
+        <a href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/" class="archive-article-date">
+  	<time datetime="2019-10-22T08:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-10-22</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <ul>
-<li>设计模式的行为模式的迭代器模式。解决的问题。</li>
-<li>迭代器实现，迭代器对象作为遍历的统一入口</li>
-<li>yield 简化</li>
-<li>foreach 封装</li>
-<li>unity 协程的迭代器原理</li>
-<li>协程嵌套原理</li>
-<li>迭代器 foreach与linq</li>
-<li><a href="http://www.resetoter.cn/?p=448" target="_blank" rel="noopener">UniRx 与 迭代器 的关系</a> 阻塞、非阻塞<blockquote>
-<p><a href="https://www.cnblogs.com/yangecnu/archive/2012/03/17/2402432.html" target="_blank" rel="noopener">参考1</a><br><a href="https://www.cnblogs.com/meet/p/5116504.html" target="_blank" rel="noopener">参考2</a></p>
+        <h1 id="迭代器模式"><a href="#迭代器模式" class="headerlink" title="迭代器模式"></a>迭代器模式</h1><h2 id="设计模式分类"><a href="#设计模式分类" class="headerlink" title="设计模式分类"></a>设计模式分类</h2><ol>
+<li>创建型模式：关注对象的创建过程(单例模式)</li>
+<li>行为型模式：关注对象间的交互、通信、协作(<strong>迭代器模式</strong>) </li>
+<li>结构型模式：关注对象和类的组织(适配器模式)</li>
+</ol>
+<h2 id="发现问题"><a href="#发现问题" class="headerlink" title="发现问题"></a>发现问题</h2><p>在软件开发中，经常遇到客户访问类需要遍历一个聚合类对象的各个元素。<br>如果将遍历代码与聚合类内部业务放一个类中，一旦更改遍历方法，聚合类源码也要做相应的修改，违背开闭原则。</p>
+<blockquote>
+<p>开闭原则：当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
 </blockquote>
-</li>
-</ul>
+<p>如果不实现遍历方法，由客户访问类自己实现遍历，则有如下缺陷：</p>
+<ol>
+<li>暴露了聚合类的内部表示，数据不安全，有被修改的风险。</li>
+<li>增加客户访问类的负担。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">   private class FileReader &#123;</span><br><span class="line">       private List&lt;string&gt; m_strLines;</span><br><span class="line"></span><br><span class="line">       public FileReader(string strPathIn) &#123;</span><br><span class="line">           m_strLines = new List&lt;string&gt;();</span><br><span class="line">           using (TextReader reader = File.OpenText(strPathIn)) &#123;</span><br><span class="line">               string line;</span><br><span class="line">               while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">                   m_strLines.Add(line);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       public void PrintLines() &#123;</span><br><span class="line">           foreach (var lin in m_strLines) &#123;</span><br><span class="line">               print(lin);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">void OnStart()&#123;</span><br><span class="line">	new FileReader(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).PrintLines();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上述代码，将遍历方法放在聚合类中，访问类调用PrintLines实现打印所有行。这时候若有新需求，要求在行首增加字段，则需要做如下修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">   private class FileReader &#123;</span><br><span class="line">       private List&lt;string&gt; m_strLines;</span><br><span class="line"></span><br><span class="line">       public FileReader(string strPathIn) &#123;</span><br><span class="line">           m_strLines = new List&lt;string&gt;();</span><br><span class="line">           using (TextReader reader = File.OpenText(strPathIn)) &#123;</span><br><span class="line">               string line;</span><br><span class="line">               while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">                   m_strLines.Add(line);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       public void PrintLines(string strLineHeadIn) &#123;</span><br><span class="line">           foreach (var lin in m_strLines) &#123;</span><br><span class="line">               print(strLineHead + lin);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">void OnStart()&#123;</span><br><span class="line">	new FileReader(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).PrintLines();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若再有新需求，要求隔行打印，则还是需要修改聚合类，这样类的可重用性就非常差。<br>如果将m_strLines暴露给访问类，则外部可能通过修改集合侵入到聚合类的内部，对于有些做sdk开发的来说是无法接受的。</p>
+<h2 id="迭代器模式-1"><a href="#迭代器模式-1" class="headerlink" title="迭代器模式"></a>迭代器模式</h2><p>将聚合类拆分为容器类(C#实现IEnumerable接口的类)和迭代器类(C#实现IEnumerator接口的类)。容器类负责处理内部逻辑，迭代器类对外提供访问功能。</p>
+<blockquote>
+<p>java 迭代器接口叫Iterator, 容器类叫Iterable。 C# 迭代器接口叫Ienumerator, 容器叫Ienumerable。</p>
+</blockquote>
+<p><img src="https://github.com/monk-half/VFrameworkDoc/blob/master/blog_res/images/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84%E5%9B%BE.png" alt="1"></p>
+<p>将迭代器类抽象出来，访问类可以任意修改访问方法而不改动到容器类，另外由于数据是由迭代器类提供的，访问类无法直接修改到容器类的数据，保证了数据安全。<br>抽象出迭代器类的另一个好处是，所有实现迭代器接口&amp;容器接口的容器类，对外提供统一的访问方法，保证了接口的一致性。后期容器类若有设计上的变动(如array改为list)，<br>对容器类的修改不影响访问类的遍历(访问类访问的是迭代器接口的方法)。 </p>
+<blockquote>
+<p>C# 的容器类例如List、Queue、HashTable、Dictionary都实现了迭代器模式。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">private class FileReader2 : IEnumerable &#123;</span><br><span class="line">       private List&lt;string&gt; m_lststrLines;</span><br><span class="line"></span><br><span class="line">       public FileReader3(string strFileNameIn) &#123;</span><br><span class="line">           m_lststrLines = new List&lt;string&gt;();</span><br><span class="line">           using (TextReader reader = File.OpenText(strFileNameIn)) &#123;</span><br><span class="line">               string line;</span><br><span class="line">               while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">                   m_lststrDatas.Add(line);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       public IEnumerator GetEnumerator() &#123;</span><br><span class="line">           return new Enumerator(this);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       private class Enumerator : IEnumerator &#123;</span><br><span class="line"></span><br><span class="line">           private FileReader3 m_FileReader3;</span><br><span class="line">           private int m_iPosition;</span><br><span class="line"></span><br><span class="line">           public Enumerator(FileReader3 filreReader3In) &#123;</span><br><span class="line">               m_FileReader3 = filreReader3In;</span><br><span class="line">               m_iPosition = 0;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           public object Current &#123; get &#123; return m_FileReader3.m_lststrLines[m_iPosition]; &#125; &#125;</span><br><span class="line"></span><br><span class="line">           public bool MoveNext() &#123;</span><br><span class="line">			return (++m_iPosition &gt;= m_FileReader3.m_lststrLines.Count) ? false:true;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           public void Reset() &#123;</span><br><span class="line">               throw new System.NotImplementedException();</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void OnStart()&#123;</span><br><span class="line">	Ienumerator ie = new FileReader2(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).GetEnumerator();</span><br><span class="line">	while(ie.MoveNext())&#123; //返回false则结束</span><br><span class="line">		print(ie.current);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码，FileReader2是容器类，继承容器接口，Enumerator是迭代器类，继承迭代器接口。容器接口返回一个迭代器类，作为外部访问容器类的入口。<br>访问类如有遍历上的新需求，则直接在外部修改遍历方法即可，例如需要在每行增加前缀：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void OnStart()&#123;</span><br><span class="line">	Ienumerator ie = new FileReader2(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).GetEnumerator();</span><br><span class="line">	while(ie.MoveNext())&#123; //返回false则结束</span><br><span class="line">		print(&quot;head:&quot; + ie.current);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也可以直接用foreach来遍历：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void OnStart()&#123;</span><br><span class="line">    foreach (var item in new FileReader3(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;)) &#123;</span><br><span class="line">        print(item);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>foreach 用来简化遍历操作，对象必须是容器类(继承IEnumberable)。</p>
+</blockquote>
+<h2 id="yield-语句"><a href="#yield-语句" class="headerlink" title="yield 语句"></a>yield 语句</h2><p>C# 1.0中，内建了对迭代器的支持，即foreach语句。访问类不需要通过GetEnumerator，再通过While循环遍历迭代器，直接通过foreach遍历一个容器类即可。<br>虽然针对遍历做了简化，但是容器类实现起来还是很麻烦。相对于FileReader, 实现了迭代器模式的FileReader2代码量多了很多。<br>C# 2.0 针对这种情况，设计了yield语句。</p>
+<h3 id="迭代块-Iterator-和yield-return-语句"><a href="#迭代块-Iterator-和yield-return-语句" class="headerlink" title="迭代块(Iterator)和yield return 语句"></a>迭代块(Iterator)和yield return 语句</h3><p>迭代块是两个yied return语句之间的代码。 一次MoveNext()执行一个迭代块。<br>yield return 后面的值对应Current属性，Current值类型通过泛型指定(Ienumerator<T>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private Ienumerator&lt;int&gt; Enumerator()&#123;</span><br><span class="line">	yield return 0; //返回值=Ienumerator.Current</span><br><span class="line">	print(&quot;迭代块开始&quot;);</span><br><span class="line">	//do sth.. //move next执行代码块</span><br><span class="line">	print(&quot;迭代块结束&quot;);</span><br><span class="line">	yield return 1; //返回值=Ienumerator.Current</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>FileReader2使用yield return 简化：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">   private class FileReader3 : IEnumerable &#123;</span><br><span class="line">       private List&lt;string&gt; m_lststrDatas;</span><br><span class="line"></span><br><span class="line">       public FileReader3(string strFileNameIn) &#123;</span><br><span class="line">           m_lststrDatas = new List&lt;string&gt;();</span><br><span class="line">           using (TextReader reader = File.OpenText(strFileNameIn)) &#123;</span><br><span class="line">               string line;</span><br><span class="line">               while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">                   m_lststrDatas.Add(line);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       public IEnumerator GetEnumerator() &#123;</span><br><span class="line">           return Enumerator2(this);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">	//迭代器类变为迭代器方法，使用yield return 定义语句块。</span><br><span class="line">       private IEnumerator Enumerator2(FileReader3 filreReader3In) &#123;</span><br><span class="line">           for (int i = 0; i &lt; filreReader3In.m_lststrDatas.Count; i++) &#123;</span><br><span class="line">               yield return filreReader3In.m_lststrDatas[i];</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void Start()&#123;</span><br><span class="line">	//遍历方法1</span><br><span class="line">	foreach(var item in new FileReader3(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;))&#123;</span><br><span class="line">		print(item);</span><br><span class="line">	&#125;</span><br><span class="line">	//遍历方法2</span><br><span class="line">	Ienumerator ie = new FileReader3(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).GetEnumerator();</span><br><span class="line">	while(ie.MoveNext())&#123; //返回false则结束</span><br><span class="line">		print(&quot;head:&quot; + ie.current);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码，Enumerator2方法取代迭代器类。<br>如果容器类无多余操作，还可进一步简化：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">//容器方法取代容器类</span><br><span class="line">   private IEnumerable&lt;string&gt; FileReader4(string strFileNameIn) &#123;</span><br><span class="line">       using (TextReader reader = File.OpenText(strFileNameIn)) &#123;</span><br><span class="line">           string line;</span><br><span class="line">           while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">               yield return line;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">void Start()&#123;</span><br><span class="line">	//遍历方法1</span><br><span class="line">	foreach(var item in new FileReader4(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;))&#123;</span><br><span class="line">		print(item);</span><br><span class="line">	&#125;</span><br><span class="line">	//遍历方法2</span><br><span class="line">	Ienumerator ie = new FileReader4(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;).GetEnumerator();</span><br><span class="line">	while(ie.MoveNext())&#123; //返回false则结束</span><br><span class="line">		print(&quot;head:&quot; + ie.current);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也可直接定义迭代器方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   private IEnumerator&lt;string&gt; FileReader5(string strFileNameIm) &#123;</span><br><span class="line">       using (TextReader reader = File.OpenText(strFileNameIm)) &#123;</span><br><span class="line">           string line;</span><br><span class="line">           while ((line = reader.ReadLine()) != null) &#123;</span><br><span class="line">               yield return line;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">void Start()&#123;</span><br><span class="line">	Ienumerator ie = new FileReader5(@&quot;E:\blog\blog_project\source\_posts\迭代器模式.md&quot;);</span><br><span class="line">	while(ie.MoveNext())&#123; //返回false则结束</span><br><span class="line">		print(&quot;head:&quot; + ie.current);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>foreach只能遍历容器类，无法用在迭代器上。</p>
+<h3 id="yield-break和-yield"><a href="#yield-break和-yield" class="headerlink" title="yield break和 yield"></a>yield break和 yield</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">private IEnumerable&lt;int&gt; CountWithTimeLimit(DateTime limit)</span><br><span class="line">&#123;</span><br><span class="line">    try</span><br><span class="line">    &#123;</span><br><span class="line">        for (int i = 1; i &lt;= 100; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (DateTime.Now &gt;= limit)</span><br><span class="line">            &#123;</span><br><span class="line">                yield break;</span><br><span class="line">            &#125;</span><br><span class="line">            yield return i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    finally</span><br><span class="line">    &#123;</span><br><span class="line">        print(&quot;停止迭代&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>yield break ： 结束迭代器，底层OnNext() = false。<br>try finally : 结束&amp;异常退出之前调用，普通yield return 不调用finally。</p>
+<h2 id="Unity协程与C-迭代器"><a href="#Unity协程与C-迭代器" class="headerlink" title="Unity协程与C#迭代器"></a>Unity协程与C#迭代器</h2><p>协程是unity一个重要的特性，用来将主线程中非常耗时的操作拆分成多个迭代块，分步执行，不阻塞主线程，协程本质上也是一个迭代器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  private IEnumerator test() &#123;</span><br><span class="line">      //do sth..</span><br><span class="line">      yield return new WaitForEndOfFrame();</span><br><span class="line">      //do sth..</span><br><span class="line">      yield return new WaitForSeconds(1f);</span><br><span class="line">      //do sth..</span><br><span class="line">yield return new WWW(&quot;&quot;);</span><br><span class="line">//do sth..</span><br><span class="line">yiel return new UnityWebRequest(&quot;&quot;).Send();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>从上面代码可以看到，协程实现了迭代器方法。只不过返回值是个对象。</p>
+<p>进入WWW内部，发现WWW实现了抽象类CustomYieldInstruction，CustomYieldInstruction继承自迭代器，相比迭代器多了个keepWaiting的东西。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class WWW : CustomYieldInstruction, IDisposable &#123;&#125;</span><br><span class="line"></span><br><span class="line">public abstract class CustomYieldInstruction : IEnumerator &#123;</span><br><span class="line">    protected CustomYieldInstruction();</span><br><span class="line">    public abstract bool keepWaiting &#123; get; &#125;</span><br><span class="line">    public object Current &#123; get; &#125;</span><br><span class="line">    public bool MoveNext();</span><br><span class="line">    public void Reset();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2018.4中，除了WWW，其余yeld return对象都继承YieldInstruction，该类不暴露keepWaiting属性。</p>
+</blockquote>
+<p>当用户调用StartCoroutine的时候，Unity在当前的gameobject上创建一个遍历任务，执行一次遍历，判断Current返回值的keepWaitting属性，<br>若为false，证明当前无需等待，继续执行MoveNext()<br>若为true，证明当前任务需等待，跳过当前任务。<br>每帧执行一次keepWaitting判断，若为true则跳过，若为false则MoveNext()。<br>当MoveNext返回false则结束遍历任务。</p>
+<h1 id="迭代器与响应式编程"><a href="#迭代器与响应式编程" class="headerlink" title="迭代器与响应式编程"></a>迭代器与响应式编程</h1><p>待补充</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><blockquote>
+<p><a href="https://www.cnblogs.com/meet/p/5116504.html" target="_blank" rel="noopener">设计模式总览</a><br><a href="http://c.biancheng.net/view/1395.html" target="_blank" rel="noopener">迭代器模式</a><br><a href="https://www.cnblogs.com/yangecnu/archive/2012/03/17/2402432.html" target="_blank" rel="noopener">C# 迭代器详解</a><br><a href="http://www.resetoter.cn/?p=448" target="_blank" rel="noopener">UniRx与迭代器模式</a></p>
+</blockquote>
 
       
 
@@ -265,11 +454,30 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">设计模式</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">行为模式</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">迭代器模式</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2019/10/22/C#%20%E8%BF%AD%E4%BB%A3%E5%99%A8/">展开全文 >></a>
+          <a class="article-more-a" href="/2019/10/22/%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/">展开全文 >></a>
         </p>
       
 
@@ -837,6 +1045,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">设计模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">行为模式</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">迭代器模式</a>
               </li>
             
             <div class="clearfix"></div>
